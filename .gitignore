@@ -16,3 +16,9 @@ config.json
 # vim
 *.sw?
 
+# build artifacts
+fedora/jellyfin-web-*.src.rpm
+fedora/jellyfin-web-*.tar.gz
+jellyfin-web.lnk
+.gitignore
+.vscode/tasks.json

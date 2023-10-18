@@ -2052,4 +2052,3 @@ export default function (view) {
         });
     }
 }
-
