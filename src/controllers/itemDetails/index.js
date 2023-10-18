@@ -34,6 +34,15 @@ import ServerConnections from '../../components/ServerConnections';
 import confirm from '../../components/confirm/confirm';
 import { download } from '../../scripts/fileDownloader';
 
+let rotateTimer = null;
+let rotateTimer2 = null;
+let currentIndex = 0;
+let imageCount = 0;
+let topImage = 0;
+let oldUrl = '';
+let oldindex = -2;
+let oldcount = -2;
+
 function autoFocus(container) {
     import('../../components/autoFocuser').then(({ default: autoFocuser }) => {
         autoFocuser.autoFocus(container);
@@ -516,6 +525,109 @@ function renderBackdrop(item) {
     }
 }
 
+function updateCurrentIndex() {
+    currentIndex = currentIndex += 1;
+    if (currentIndex >= imageCount) {
+        currentIndex = 0;
+    }
+}
+
+function swapImages(page, item, apiClient) {
+    if (currentIndex == oldindex && imageCount == oldcount) {
+        return;
+    }
+    oldindex = currentIndex;
+    oldcount = imageCount;
+    const itemBackdropElements = page.querySelectorAll('#rotatingBackdrop');
+    let url = '';
+    let hasbackdrop = false;
+    if (item.BackdropImageTags?.length) {
+        url = apiClient.getScaledImageUrl(item.Id, {
+            type: 'Backdrop',
+            maxWidth: dom.getScreenWidth(),
+            index: currentIndex,
+            tag: item.BackdropImageTags[0]
+        });
+        hasbackdrop = true;
+    } else if (item.ParentBackdropItemId && item.ParentBackdropImageTags && item.ParentBackdropImageTags.length) {
+        url = apiClient.getScaledImageUrl(item.ParentBackdropItemId, {
+            type: 'Backdrop',
+            maxWidth: dom.getScreenWidth(),
+            index: currentIndex,
+            tag: item.ParentBackdropImageTags[0]
+        });
+        hasbackdrop = true;
+    } else if (item.ImageTags?.Primary) {
+        url = apiClient.getScaledImageUrl(item.Id, {
+            type: 'Primary',
+            maxWidth: dom.getScreenWidth(),
+            index: currentIndex,
+            tag: item.ImageTags.Primary
+        });
+        hasbackdrop = true;
+    }
+
+    let url2 = '';
+    let hasbackdrop2 = false;
+    const index2 = (currentIndex + 1) % imageCount;
+    if (item.BackdropImageTags?.length) {
+        url2 = apiClient.getScaledImageUrl(item.Id, {
+            type: 'Backdrop',
+            maxWidth: dom.getScreenWidth(),
+            index: index2,
+            tag: item.BackdropImageTags[0]
+        });
+        hasbackdrop2 = true;
+    } else if (item.ParentBackdropItemId && item.ParentBackdropImageTags && item.ParentBackdropImageTags.length) {
+        url2 = apiClient.getScaledImageUrl(item.ParentBackdropItemId, {
+            type: 'Backdrop',
+            maxWidth: dom.getScreenWidth(),
+            index: index2,
+            tag: item.ParentBackdropImageTags[0]
+        });
+        hasbackdrop2 = true;
+    } else if (item.ImageTags?.Primary) {
+        url2 = apiClient.getScaledImageUrl(item.Id, {
+            type: 'Primary',
+            maxWidth: dom.getScreenWidth(),
+            index: index2,
+            tag: item.ImageTags.Primary
+        });
+        hasbackdrop2 = true;
+    }
+
+    if (hasbackdrop && url !== oldUrl) {
+        if (topImage == 0) {
+            itemBackdropElements[0].classList.remove('backdropImageFadeIn');
+            itemBackdropElements[0].classList.add('backdropImageFadeOut');
+            if (hasbackdrop2) {
+                itemBackdropElements[1].style.backgroundImage = "url('" + url + "'),url('" + url2 + "')";
+            } else {
+                itemBackdropElements[1].style.backgroundImage = "url('" + url + "')";
+            }
+
+            itemBackdropElements[1].classList.remove('backdropImageFadeOut');
+            itemBackdropElements[1].classList.add('backdropImageFadeIn');
+            topImage = 1;
+        } else {
+            if (hasbackdrop2) {
+                itemBackdropElements[0].style.backgroundImage = "url('" + url + "'), url('" + url2 + "')";
+            } else {
+                itemBackdropElements[0].style.backgroundImage = "url('" + url + "')";
+            }
+            itemBackdropElements[0].classList.remove('backdropImageFadeOut');
+            itemBackdropElements[0].classList.add('backdropImageFadeIn');
+            itemBackdropElements[1].classList.remove('backdropImageFadeIn');
+            itemBackdropElements[1].classList.add('backdropImageFadeOut');
+            topImage = 0;
+        }
+        oldUrl = url;
+    } else {
+        console.log('Matching URLS:' + url);
+    }
+    console.log('New Index:' + currentIndex + '/' + imageCount - 1);
+}
+
 function renderDetailPageBackdrop(page, item, apiClient) {
     // Details banner is disabled in user settings
     if (!userSettings.detailsBanner()) {
@@ -531,7 +643,15 @@ function renderDetailPageBackdrop(page, item, apiClient) {
     let hasbackdrop = false;
     const itemBackdropElement = page.querySelector('#itemBackdrop');
 
-    if (item.BackdropImageTags && item.BackdropImageTags.length) {
+    if (item.ImageTags?.Banner) {
+        imgUrl = apiClient.getScaledImageUrl(item.Id, {
+            type: 'Banner',
+            maxWidth: dom.getScreenWidth(),
+            tag: item.ImageTags.Banner
+        });
+        imageLoader.lazyImage(itemBackdropElement, imgUrl);
+        hasbackdrop = true;
+    } else if (item.BackdropImageTags?.length) {
         imgUrl = apiClient.getScaledImageUrl(item.Id, {
             type: 'Backdrop',
             maxWidth: dom.getScreenWidth(),
@@ -575,6 +695,40 @@ function reloadFromItem(instance, page, params, item, user) {
     if (!layoutManager.tv) {
         renderLogo(page, item, apiClient);
         renderDetailPageBackdrop(page, item, apiClient);
+        rotateTimer = setInterval(() => {
+            swapImages(page, item, apiClient);
+        }, 500);
+        rotateTimer2 = setInterval(() => {
+            updateCurrentIndex();
+        }, 10000);
+
+        if (item.BackdropImageTags?.length) {
+            apiClient.getItemImageInfos(item.Id).then(function (imageInfos) {
+                const images = imageInfos.filter(function (i) {
+                    return i.ImageType === 'Backdrop';
+                });
+                imageCount = images.length;
+                currentIndex = 0;
+            });
+        } else if (item.ParentBackdropItemId && item.ParentBackdropImageTags?.length) {
+            apiClient.getItemImageInfos(item.ParentBackdropItemId).then(function (imageInfos) {
+                const images = imageInfos.filter(function (i) {
+                    return i.ImageType === 'Backdrop';
+                });
+                imageCount = images.length;
+                currentIndex = 0;
+            });
+        } else if (item.ImageTags?.Primary) {
+            apiClient.getItemImageInfos(item.Id).then(function (imageInfos) {
+                const images = imageInfos.filter(function (i) {
+                    return i.ImageType === 'Backdrop';
+                });
+                imageCount = images.length;
+                currentIndex = 0;
+            });
+        }
+        currentIndex = -1;
+        swapImages(page, item, apiClient);
     }
 
     renderBackdrop(item);
