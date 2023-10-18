@@ -1969,4 +1969,3 @@ export default function (view) {
         });
     }
 }
-
