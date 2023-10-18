@@ -226,7 +226,7 @@ html {
 }
 
 .noBackdropTransparency .detailPageSecondaryContainer {
-    background-color: #101010;
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .listItem-border {
@@ -520,4 +520,10 @@ html {
 #dialogToc .toc li a:active,
 #dialogToc .toc li a:hover {
     color: #00a4dc;
+}
+
+.lazy-hidden {
+    display: none;
+    width: 0;
+    height: 0;
 }

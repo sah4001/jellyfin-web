@@ -2070,4 +2070,3 @@ export default function (view) {
         });
     }
 }
-
