@@ -1756,6 +1756,12 @@ function tryRemoveElement(elem) {
         }, {
             name: '2x',
             id: 2.0
+        }, {
+            name: '2.5x',
+            id: 2.5
+        }, {
+            name: '3x',
+            id: 3.0
         }];
     }
 
