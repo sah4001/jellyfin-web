@@ -15,10 +15,10 @@ class BackdropScreensaver {
         const query = {
             ImageTypes: 'Backdrop',
             EnableImageTypes: 'Backdrop',
-            IncludeItemTypes: 'Movie,Series,MusicArtist',
+            IncludeItemTypes: 'Movie,Series',
             SortBy: 'Random',
             Recursive: true,
-            Fields: 'Taglines',
+            Fields: 'Taglines, SortName',
             isPlayed: false,
             ImageTypeLimit: 10,
             StartIndex: 0,

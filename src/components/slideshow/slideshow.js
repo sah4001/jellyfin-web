@@ -412,7 +412,10 @@ export default function (options) {
         return getSwiperSlideHtmlFromSlide({
             originalImage: getImgUrl(item, currentOptions.user),
             Id: item.Id,
-            ServerId: item.ServerId
+            ServerId: item.ServerId,
+            title: item.title,
+            description: item.description,
+            subtitle: item.subtitle
         });
     }
 
@@ -430,7 +433,7 @@ export default function (options) {
         }
         html += '<img src="' + item.originalImage + '" class="swiper-slide-img">';
         html += '</div>';
-        if (item.title || item.subtitle) {
+        if (item.title || item.description) {
             html += '<div class="slideText">';
             html += '<div class="slideTextInner">';
             if (item.title) {
