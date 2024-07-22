@@ -14,10 +14,10 @@ class BackdropScreensaver {
         const query = {
             ImageTypes: 'Backdrop',
             EnableImageTypes: 'Backdrop',
-            IncludeItemTypes: 'Movie,Series,MusicArtist',
+            IncludeItemTypes: 'Movie,Series',
             SortBy: 'Random',
             Recursive: true,
-            Fields: 'Taglines',
+            Fields: 'Taglines, SortName',
             ImageTypeLimit: 10,
             StartIndex: 0,
             Limit: 200
@@ -25,6 +25,27 @@ class BackdropScreensaver {
 
         const apiClient = ServerConnections.currentApiClient();
         apiClient.getItems(apiClient.getCurrentUserId(), query).then((result) => {
+            // console.log('results:');
+            let i;
+            let item;
+            for (i = 0; i < result.Items.length; i++) {
+                item = result.Items[i];
+                // console.log((i + 1) + ':Path:' + item.Path.toString());
+                // console.log((i + 1) + ':Name:' + item.Name.toString());
+                // console.log((i + 1) + ':ParentId:' + item.ParentId.toString());
+                if (item.SortName != '') {
+                    item.title = item.SortName;
+                }
+                if (item.Name != '') {
+                    item.title = item.Name;
+                }
+                if (item.Taglines != '') {
+                    item.description = item.Taglines;
+                }
+            }
+            // result.Items.forEach(function(entry) {
+            //     console.log(entry.toString());
+            // });
             if (result.Items.length) {
                 import('../../components/slideshow/slideshow').then(({ default: Slideshow }) => {
                     const newSlideShow = new Slideshow({
