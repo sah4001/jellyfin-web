@@ -9,6 +9,7 @@ class BackdropScreensaver {
         this.type = PluginType.Screensaver;
         this.id = 'backdropscreensaver';
         this.supportsAnonymous = false;
+        this.hideOnMouse = false;
     }
     show() {
         const query = {
@@ -18,6 +19,7 @@ class BackdropScreensaver {
             SortBy: 'Random',
             Recursive: true,
             Fields: 'Taglines, SortName',
+            isPlayed: false,
             ImageTypeLimit: 10,
             StartIndex: 0,
             Limit: 200
@@ -30,9 +32,7 @@ class BackdropScreensaver {
             let item;
             for (i = 0; i < result.Items.length; i++) {
                 item = result.Items[i];
-                // console.log((i + 1) + ':Path:' + item.Path.toString());
                 // console.log((i + 1) + ':Name:' + item.Name.toString());
-                // console.log((i + 1) + ':ParentId:' + item.ParentId.toString());
                 if (item.SortName != '') {
                     item.title = item.SortName;
                 }
@@ -43,9 +43,6 @@ class BackdropScreensaver {
                     item.description = item.Taglines;
                 }
             }
-            // result.Items.forEach(function(entry) {
-            //     console.log(entry.toString());
-            // });
             if (result.Items.length) {
                 import('../../components/slideshow/slideshow').then(({ default: Slideshow }) => {
                     const newSlideShow = new Slideshow({

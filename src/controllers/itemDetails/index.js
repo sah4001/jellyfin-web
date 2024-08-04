@@ -529,7 +529,28 @@ function renderHeaderBackdrop(page, item, apiClient) {
 function reloadFromItem(instance, page, params, item, user) {
     const apiClient = ServerConnections.getApiClient(item.ServerId);
 
-    libraryMenu.setTitle('');
+    // libraryMenu.setTitle('Index 1');
+    // console.log('Type: ' + item.Type);
+    // console.log('Name: ' + item.Name);
+    // console.log('SeriesName: ' + item.SeriesName);
+    // console.log('SeasonName: ' + item.SeasonName);
+    // console.log('ParentIndexNumber: ' + item.ParentIndexNumber);
+    // console.log('SeasonId: ' + item.SeasonId);
+    if (item.Name && item.Type === 'Episode') {
+        libraryMenu.setTitle(escapeHtml(item.Name));
+    } else if (item.SeriesName && item.Type === 'Series') {
+        libraryMenu.setTitle(escapeHtml(item.SeriesName));
+    } else if (item.Name && item.Type === 'Series') {
+        libraryMenu.setTitle(escapeHtml(item.Name));
+    } else if (item.SeasonName && item.Type === 'Season') {
+        libraryMenu.setTitle(escapeHtml(item.SeasonName));
+    } else if (item.Name && item.Type === 'Season') {
+        libraryMenu.setTitle(escapeHtml(item.Name));
+    } else if (item.ParentIndexNumber != null && item.Type === 'Season') {
+        libraryMenu.setTitle(escapeHtml(item.SeasonName || 'S' + item.ParentIndexNumber));
+    } else {
+        libraryMenu.setTitle('');
+    }
 
     // Start rendering the artwork first
     renderImage(page, item, apiClient);
@@ -2073,7 +2094,22 @@ export default function (view, params) {
 
             if (e.detail.isRestored) {
                 if (currentItem) {
-                    libraryMenu.setTitle('');
+                    if (currentItem.Name && currentItem.Type === 'Episode') {
+                        libraryMenu.setTitle(escapeHtml(currentItem.Name));
+                    } else if (currentItem.SeriesName && currentItem.Type === 'Series') {
+                        libraryMenu.setTitle(escapeHtml(currentItem.SeriesName));
+                    } else if (currentItem.Name && currentItem.Type === 'Series') {
+                        libraryMenu.setTitle(escapeHtml(currentItem.Name));
+                    } else if (currentItem.SeasonName && currentItem.Type === 'Season') {
+                        libraryMenu.setTitle(escapeHtml(itecurrentItemm.SeasonName));
+                    } else if (currentItem.Name && currentItem.Type === 'Season') {
+                        libraryMenu.setTitle(escapeHtml(currentItem.Name));
+                    } else if (currentItem.ParentIndexNumber != null && currentItem.Type === 'Season') {
+                        libraryMenu.setTitle(escapeHtml(currentItem.SeasonName || 'S' + currentItem.ParentIndexNumber));
+                    } else {
+                        libraryMenu.setTitle('');
+                    }
+
                     renderTrackSelections(page, self, currentItem, true);
                     renderBackdrop(page, currentItem);
                 }
