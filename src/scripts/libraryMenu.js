@@ -774,7 +774,7 @@ function setTitle (title) {
         pageTitleElement.innerText = html || '';
     }
 
-    document.title = title || documentTitle;
+    document.title = title || 'Jellyfin_setTitle';
 }
 
 function setTransparentMenu (transparent) {
