@@ -12,6 +12,7 @@ config.json
 # ide
 .idea
 .vs
+.vscode
 
 # vim
 *.sw?
@@ -21,3 +22,4 @@ config.json
 
 # environment related
 .envrc
+.gitignore
